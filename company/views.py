@@ -1,9 +1,8 @@
 from django.shortcuts import render
-from .models import Company , UserModel
+from .models import Company , userModel
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from .serializers import CompanySerializer
-from django.contrib.auth.hashers import check_password, make_password
+from .serializers import CompanySerializer , userSerializer
 
 def home(request):
 
@@ -16,45 +15,40 @@ def home(request):
 
 @api_view(['GET'])
 def test(request):
-    companies = Company.objects.all()
+    users = userModel.objects.all()
 
-    serializer = CompanySerializer(companies , many = True)
+    serializer = userSerializer(users , many = True)
 
     return Response(serializer.data)
 
 
 
-
+# NEW APIs
 @api_view(['POST'])
 def login(request):
 
     email = request.data.get('email')
     password = request.data.get('password')
 
-    if not email or not password:
+    user = userModel.objects.filter(
+        email = email,
+        password = password
+    ).first()
+
+    if user :
         return Response({
-            "status": False,
-            "message": "Email and password required"
+            'status' : True,
+            'message' : "Login Success",
+            'name' : user.name,
+            'email' : email,
         })
-
-    user = UserModel.objects.filter(email=email).first()
-
-    if user and check_password(password, user.password):
+    else:
         return Response({
-            "status": True,
-            "message": "Login successful",
-            "user": {
-                "id": user.id,
-                "name": user.name,
-                "email": user.email,
-            }
-        })
-
-    return Response({
-        "status": False,
-        "message": "Invalid email or password"
+        'success': False,
+        'message': 'Invalid Email or Password',
+        'name' : "",
+        'email' : email,
     })
-
 
 @api_view(["POST"])
 def register(request):
@@ -62,34 +56,30 @@ def register(request):
     name = request.data.get('name')
     email = request.data.get('email')
     mobile = request.data.get('mobile')
-    password = request.data.get('password')
+    password = request.data.get('password')   
 
-    if not name or not email or not password:
+    checkUser = userModel.objects.filter(
+        email = email
+    ).first()
+
+    if checkUser :
         return Response({
-            "status": False,
-            "message": "Missing required fields"
-        })
-
-    checkUser = UserModel.objects.filter(email=email).first()
-
-    if checkUser:
+            'status' : False,
+            'message' : 'Email already exists'
+        }) 
+    else:
+        user = userModel.objects.create(
+            name = name,
+            email = email,
+            mobile = mobile,
+            password = password
+        )
         return Response({
-            'status': False,
-            'message': 'Email already exists'
+            'status' : True,
+            'message' : 'Register Success',
+            'email' : email
         })
-
-    user = UserModel.objects.create(
-        name=name,
-        email=email,
-        mobile=mobile,
-        password=make_password(password)
-    )
-
-    return Response({
-        'status': True,
-        'message': 'Register Success',
-        'email': email
-    })
+    
 
 
 
