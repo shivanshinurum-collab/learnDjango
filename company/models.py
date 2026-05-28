@@ -46,7 +46,7 @@ class quizz(models.Model):
 class leaderboard(models.Model):
     id = models.AutoField(primary_key=True)
     email = models.CharField(max_length=25)
-    score = models.IntegerField()
+    score = models.IntegerField(default=0)
     
     def __str__(self):
         return self.email

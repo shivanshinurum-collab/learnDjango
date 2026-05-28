@@ -262,7 +262,7 @@ def getUserWallet(request):
         email = email,
         defaults={'wallet' : 0}
     )
-    obj.arefresh_from_db
+    obj.refresh_from_db()
     return Response({
         'status' : True,
         'wallet' : obj.wallet
@@ -284,7 +284,7 @@ def addMoneyWallet(request):
         'status' : True,
         'message' : 'Money Added Success',
         'email' : email,
-        'wallet' : money
+        'wallet' : obj.wallet
     })    
 
 
